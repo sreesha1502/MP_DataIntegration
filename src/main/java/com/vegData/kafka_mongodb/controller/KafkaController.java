@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.vegData.kafka_mongodb.collection.Poles;
+import com.vegData.kafka_mongodb.collection.RawDataPole;
 import com.vegData.kafka_mongodb.service.KafkaProducerService;
 
 import org.springframework.http.MediaType;
@@ -25,7 +25,7 @@ public class KafkaController {
     private KafkaProducerService kafkaProducerService;
 
     @PostMapping("/send")
-    public String sendMessage(@RequestBody Poles poles) {
+    public String sendMessage(@RequestBody RawDataPole poles) {
         kafkaProducerService.sendMessage("poles", poles);
         return "Message sent to Kafka topic";
     }

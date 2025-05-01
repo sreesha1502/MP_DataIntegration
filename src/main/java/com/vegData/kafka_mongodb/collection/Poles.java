@@ -30,5 +30,6 @@ public class Poles {
     private String capturedDate;
     private Geometry gps;
     private GeoJsonPoint location;
-
+    private double fieldOfView;
+    private int satellitesUsed;
 }

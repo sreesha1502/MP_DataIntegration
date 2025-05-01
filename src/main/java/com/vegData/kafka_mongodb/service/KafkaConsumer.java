@@ -9,6 +9,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.InsertOneResult;
 import com.vegData.kafka_mongodb.collection.Poles;
+import com.vegData.kafka_mongodb.collection.RawDataPole;
 
 import org.springframework.messaging.handler.annotation.Header;
 import lombok.extern.slf4j.Slf4j;
@@ -62,16 +63,25 @@ public class KafkaConsumer {
     }
 
     @KafkaListener(topics = "${spring.kafka.topic.name}", groupId = "${spring.kafka.consumer.group-id}", containerFactory = "kafkaListenerContainerFactory")
-    public void consume(Poles data) {
+    public void consume(RawDataPole data) {
 
         try {
             MongoCollection<Poles> collection = database.getCollection(collectionName, Poles.class);
-            GeoJsonPoint location = new GeoJsonPoint(data.getGps().getCoordinates()[0],data.getGps().getCoordinates()[1]);
-            
-            System.out.println(location);
-            data.setGps(null);
-            data.setLocation(location);
-            InsertOneResult result = collection.insertOne(data);
+            GeoJsonPoint location = new GeoJsonPoint(data.getNmeaInfo().getLongitude(),
+                    data.getNmeaInfo().getLatitude());
+            Poles pole = new Poles();
+            pole.setPoleId(data.getPoleId());
+            pole.setAltitude(data.getNmeaInfo().getAltitude());
+            pole.setSpeed((int) data.getNmeaInfo().getSpeedOverGround());
+            pole.setFixType(data.getNmeaInfo().getFixType());
+            pole.setCourseOverGround(data.getNmeaInfo().getCourseOverGround());
+            pole.setHdop(data.getNmeaInfo().getHdop());
+            pole.setCapturedDate(data.getCapturedDate());
+            pole.setLocation(location);
+            pole.setFieldOfView(data.getCameraInfo().getFieldOfView());
+            pole.setSatellitesUsed(data.getNmeaInfo().getSatellitesUsed());
+            System.out.println("Pole ID: " + pole.toString());
+            InsertOneResult result = collection.insertOne(pole);
 
             if (result.wasAcknowledged()) {
                 LOGGER.info("*** kafka Message saved **** ");

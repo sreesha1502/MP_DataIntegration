@@ -16,7 +16,7 @@ import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 import com.fasterxml.jackson.databind.ser.std.ByteArraySerializer;
-import com.vegData.kafka_mongodb.collection.Poles;
+import com.vegData.kafka_mongodb.collection.RawDataPole;
 
 @EnableKafka
 @Configuration
@@ -29,7 +29,7 @@ public class KafkaConsumerConfig {
     private String groupId;
 
     @Bean
-    public ConsumerFactory<String, Poles> consumerFactory() {
+    public ConsumerFactory<String, RawDataPole> consumerFactory() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,bootstrapAddress);
         props.put(ConsumerConfig.GROUP_ID_CONFIG,groupId);
@@ -38,14 +38,14 @@ public class KafkaConsumerConfig {
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS,JsonDeserializer.class.getName());
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
-        return new DefaultKafkaConsumerFactory<>(props ,new StringDeserializer(), new JsonDeserializer<>(Poles.class));
+        return new DefaultKafkaConsumerFactory<>(props ,new StringDeserializer(), new JsonDeserializer<>(RawDataPole.class));
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, Poles>
+    public ConcurrentKafkaListenerContainerFactory<String, RawDataPole>
     kafkaListenerContainerFactory() {
 
-        ConcurrentKafkaListenerContainerFactory<String, Poles> factory =
+        ConcurrentKafkaListenerContainerFactory<String, RawDataPole> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         return factory;

@@ -6,7 +6,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-import com.vegData.kafka_mongodb.collection.Poles;
+import com.vegData.kafka_mongodb.collection.RawDataPole;
 
 @Service
 @PropertySource(value = "classpath:application.properties")
@@ -15,17 +15,17 @@ public class KafkaProducerService {
     @Value(value = "${spring.kafka.topic.name}")
     private String topicName;
 
-    private final KafkaTemplate<String, Poles> kafkaTemplate;
+    private final KafkaTemplate<String, RawDataPole> kafkaTemplate;
     private final KafkaTemplate<String, byte[]> imageKafkaTemplate;
 
-    public KafkaProducerService(KafkaTemplate<String, Poles> kafkaTemplate,
+    public KafkaProducerService(KafkaTemplate<String, RawDataPole> kafkaTemplate,
             KafkaTemplate<String, byte[]> imageKafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
         this.imageKafkaTemplate = imageKafkaTemplate;
     }
 
-    public void sendMessage(String key, Poles msg) {
-        ProducerRecord<String, Poles> record = new ProducerRecord<>(topicName, key, msg);
+    public void sendMessage(String key, RawDataPole msg) {
+        ProducerRecord<String, RawDataPole> record = new ProducerRecord<>(topicName, key, msg);
         kafkaTemplate.send(record);
     }
 

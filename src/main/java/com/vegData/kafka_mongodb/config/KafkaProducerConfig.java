@@ -16,7 +16,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
-import com.vegData.kafka_mongodb.collection.Poles;
+import com.vegData.kafka_mongodb.collection.RawDataPole;
 
 @EnableKafka
 @Configuration
@@ -26,7 +26,7 @@ public class KafkaProducerConfig {
     private String bootstrapAddress;
 
     @Bean
-    public ProducerFactory<String, Poles> producerFactory() {
+    public ProducerFactory<String, RawDataPole> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,bootstrapAddress);
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,StringSerializer.class);
@@ -36,7 +36,7 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public KafkaTemplate<String, Poles> kafkaTemplate() {
+    public KafkaTemplate<String, RawDataPole> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
 
