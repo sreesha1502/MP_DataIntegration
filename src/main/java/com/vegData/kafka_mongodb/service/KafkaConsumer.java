@@ -47,7 +47,7 @@ public class KafkaConsumer {
     @Value("kafkaMsg")
     private String collectionName; // used @Value to read from app props file
 
-    private final String imgDir = "/var/www/RoadPolesImages/kafkaTest";
+    private final String imgDir = "/var/www/RoadPolesImages/kafkaTest/";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaConsumer.class);
 
