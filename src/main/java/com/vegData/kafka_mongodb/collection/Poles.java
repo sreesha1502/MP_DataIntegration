@@ -18,9 +18,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Poles {
 
-    @Id
-    private String id;
-    @Field("id")
     private String poleId;
     private double altitude;
     private int speed;
