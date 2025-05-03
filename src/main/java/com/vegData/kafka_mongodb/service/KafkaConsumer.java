@@ -4,7 +4,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.InsertOneResult;
@@ -41,7 +40,8 @@ import java.nio.file.Files;
 @PropertySource(value = "classpath:application.properties")
 public class KafkaConsumer {
 
-    private MongoClient mongoClient;
+    private final MongoClient mongoClient;
+
     private MongoDatabase database;
 
     @Value("kafkaMsg")
@@ -51,14 +51,13 @@ public class KafkaConsumer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaConsumer.class);
 
-    KafkaConsumer(@Value("${spring.data.mongodb.uri}") String mongoUri,
-            @Value("${spring.data.mongodb.database}") String databaseName) {
+    KafkaConsumer(MongoClient mongoClient, @Value("${spring.data.mongodb.database}") String databaseName) {
         CodecProvider pojoCodecProvider = PojoCodecProvider.builder().automatic(true).build();
 
         CodecRegistry pojoCodecRegistry = fromRegistries(getDefaultCodecRegistry(), fromProviders(pojoCodecProvider));
+        this.mongoClient = mongoClient;
 
-        this.mongoClient = MongoClients.create(mongoUri);
-        this.database = mongoClient.getDatabase(databaseName).withCodecRegistry(pojoCodecRegistry);
+        this.database = this.mongoClient.getDatabase(databaseName).withCodecRegistry(pojoCodecRegistry);
 
     }
 
@@ -90,10 +89,6 @@ public class KafkaConsumer {
             }
         } catch (Exception e) {
             LOGGER.error("Error while consuming message", e.getCause());
-        } finally {
-            if (this.mongoClient != null) {
-                this.mongoClient.close();
-            }
         }
     }
 
