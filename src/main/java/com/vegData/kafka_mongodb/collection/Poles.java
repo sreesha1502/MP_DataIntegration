@@ -1,9 +1,7 @@
 package com.vegData.kafka_mongodb.collection;
 
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -12,7 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Document(collection = "poles")
+@Document(collection = "kafkaMsg")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @AllArgsConstructor
 @NoArgsConstructor

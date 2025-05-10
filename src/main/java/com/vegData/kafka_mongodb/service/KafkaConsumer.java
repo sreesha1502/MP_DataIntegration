@@ -9,10 +9,12 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.InsertOneResult;
 import com.vegData.kafka_mongodb.collection.Poles;
 import com.vegData.kafka_mongodb.collection.RawDataPole;
+import com.vegData.kafka_mongodb.repository.PolesRepository;
 
 import org.springframework.messaging.handler.annotation.Header;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
@@ -45,7 +47,10 @@ public class KafkaConsumer {
     private MongoDatabase database;
 
     @Value("kafkaMsg")
-    private String collectionName; // used @Value to read from app props file
+    private String collectionName;
+
+    @Autowired
+    private PolesRepository polesRepository;
 
     private final String imgDir = "/var/www/RoadPolesImages/kafkaTest/";
 
@@ -68,25 +73,37 @@ public class KafkaConsumer {
             MongoCollection<Poles> collection = database.getCollection(collectionName, Poles.class);
             GeoJsonPoint location = new GeoJsonPoint(data.getNmeaInfo().getLongitude(),
                     data.getNmeaInfo().getLatitude());
-            Poles pole = new Poles();
-            pole.setPoleId(data.getPoleId());
-            pole.setAltitude(data.getNmeaInfo().getAltitude());
-            pole.setSpeed((int) data.getNmeaInfo().getSpeedOverGround());
-            pole.setFixType(data.getNmeaInfo().getFixType());
-            pole.setCourseOverGround(data.getNmeaInfo().getCourseOverGround());
-            pole.setHdop(data.getNmeaInfo().getHdop());
-            pole.setCapturedDate(data.getCapturedDate());
-            pole.setLocation(location);
-            pole.setFieldOfView(data.getCameraInfo().getFieldOfView());
-            pole.setSatellitesUsed(data.getNmeaInfo().getSatellitesUsed());
-            System.out.println("Pole ID: " + pole.toString());
-            InsertOneResult result = collection.insertOne(pole);
 
-            if (result.wasAcknowledged()) {
-                LOGGER.info("*** kafka Message saved **** ");
+            Poles[] nearPoles = polesRepository
+                    .findNearestPoles(data.getCapturedDate(), location.getX(), location.getY()).toArray(Poles[]::new);
+
+            if(nearPoles.length > 0) {
+                System.out.println(nearPoles[0]);
+                LOGGER.info("*** Pole Data exists **** ");
             } else {
-                LOGGER.warn("*** Unable to save message from kafka **** ");
+                Poles pole = new Poles();
+                pole.setPoleId(data.getPoleId());
+                pole.setAltitude(data.getNmeaInfo().getAltitude());
+                pole.setSpeed((int) data.getNmeaInfo().getSpeedOverGround());
+                pole.setFixType(data.getNmeaInfo().getFixType());
+                pole.setCourseOverGround(data.getNmeaInfo().getCourseOverGround());
+                pole.setHdop(data.getNmeaInfo().getHdop());
+                pole.setCapturedDate(data.getCapturedDate());
+                pole.setLocation(location);
+                pole.setFieldOfView(data.getCameraInfo().getFieldOfView());
+                pole.setSatellitesUsed(data.getNmeaInfo().getSatellitesUsed());
+                System.out.println("Pole ID: " + pole.toString());
+                // getNearestPole(pole.getCapturedDate(), pole.getLocation().getX(),
+                // pole.getLocation().getY());
+                InsertOneResult result = collection.insertOne(pole);
+    
+                if (result.wasAcknowledged()) {
+                    LOGGER.info("*** kafka Message saved **** ");
+                } else {
+                    LOGGER.warn("*** Unable to save message from kafka **** ");
+                }
             }
+    
         } catch (Exception e) {
             LOGGER.error("Error while consuming message", e.getCause());
         }
